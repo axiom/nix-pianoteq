@@ -9,8 +9,8 @@
       with import nixpkgs { system = "x86_64-linux"; };
       stdenv.mkDerivation rec {
         pname = "pianoteq";
-        version = "9.1.0";
-        in_file = "pianoteq_setup_v910.tar.xz";
+        version = "9.1.1";
+        in_file = "pianoteq_setup_v911.tar.xz";
 
         icon = fetchurl {
           name = "pianoteq_icon_128";
@@ -25,7 +25,7 @@
         src = requireFile {
           name = "${in_file}";
           message = "Download the file from: https://www.modartt.com/download?file=${in_file} and add it to the nix store manually: nix store add-file ./${in_file}";
-          sha256 = "sha256-lEOVdEFtbV9+lEQu9gKEHAwtTTnU22Tj5Vkx3aPijrc=";
+          sha256 = "sha256-Fu+bt3nxOYmSqzobENbrtYiUlRDO9dZ9y7Iqw+jQvPQ=";
         };
 
         # Alternative: Downloaded manually and place in this directory
