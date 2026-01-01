@@ -9,8 +9,8 @@
       with import nixpkgs { system = "x86_64-linux"; };
       stdenv.mkDerivation rec {
         pname = "pianoteq";
-        version = "8.4.1";
-        in_file = "pianoteq_linux_v841.7z";
+        version = "9.1.0";
+        in_file = "pianoteq_setup_v910.tar.xz";
 
         icon = fetchurl {
           name = "pianoteq_icon_128";
@@ -25,7 +25,7 @@
         src = requireFile {
           name = "${in_file}";
           message = "Download the file from: https://www.modartt.com/download?file=${in_file} and add it to the nix store manually: nix store add-file ./${in_file}";
-          sha256 = "sha256-PPRSZ0qnDfWyTaQGuB0osWvIPHYMPaSB159FDrXaY0E=";
+          sha256 = "sha256-lEOVdEFtbV9+lEQu9gKEHAwtTTnU22Tj5Vkx3aPijrc=";
         };
 
         # Alternative: Downloaded manually and place in this directory
@@ -33,15 +33,16 @@
 
         desktopItems = [
           (makeDesktopItem {
-            name = "pianoteq8";
-            desktopName = "Pianoteq 8";
-            exec = "pianoteq8";
+            name = "pianoteq9";
+            desktopName = "Pianoteq 9";
+            exec = "pianoteq9";
             icon = "pianoteq_icon_128";
           })
         ];
 
         nativeBuildInputs = [
-          p7zip
+          xz
+          tar
           copyDesktopItems
         ];
 
@@ -56,18 +57,18 @@
           libGL
         ];
 
-        unpackCmd = "7z x ${src}";
+        unpackCmd = "tar xf ${src} --strip-components=1";
 
         # `runHook postInstall` is mandatory otherwise postInstall won't run
         installPhase = ''
-          install -Dm 755 x86-64bit/Pianoteq\ 8 $out/bin/pianoteq8
-          install -Dm 755 x86-64bit/Pianoteq\ 8.lv2/Pianoteq_8.so \
-                          $out/lib/lv2/Pianoteq\ 8.lv2/Pianoteq_8.so
+          install -Dm 755 x86-64bit/Pianoteq\ 9 $out/bin/pianoteq9
+          install -Dm 755 x86-64bit/Pianoteq\ 9.lv2/Pianoteq_9.so \
+                          $out/lib/lv2/Pianoteq\ 9.lv2/Pianoteq_9.so
           patchelf --set-interpreter "$(< $NIX_CC/nix-support/dynamic-linker)" \
-                   --set-rpath $libPath "$out/bin/pianoteq8"
-          cd x86-64bit/Pianoteq\ 8.lv2/
+                   --set-rpath $libPath "$out/bin/pianoteq9"
+          cd x86-64bit/Pianoteq\ 9.lv2/
           for i in *.ttl; do
-              install -D "$i" "$out/lib/lv2/Pianoteq 8.lv2/$i"
+              install -D "$i" "$out/lib/lv2/Pianoteq 9.lv2/$i"
           done
           runHook postInstall
         '';
