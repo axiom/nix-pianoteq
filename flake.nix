@@ -42,7 +42,6 @@
 
         nativeBuildInputs = [
           xz
-          tar
           copyDesktopItems
         ];
 
@@ -57,7 +56,7 @@
           libGL
         ];
 
-        unpackCmd = "tar xf ${src} --strip-components=1";
+        unpackCmd = "tar xf ${src}";
 
         # `runHook postInstall` is mandatory otherwise postInstall won't run
         installPhase = ''
