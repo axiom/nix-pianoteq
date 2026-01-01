@@ -61,15 +61,26 @@
 
         # `runHook postInstall` is mandatory otherwise postInstall won't run
         installPhase = ''
+          install -d "$out/lib/vst3/Pianoteq 9.vst3/Contents/Resources/Snapshots"
+          cd x86-64bit/Pianoteq\ 9.vst3/Contents/
+	  cp -R --no-preserve=ownership "." "$out/lib/vst3/Pianoteq 9.vst3/Contents/"
+	  cd ../../..
+
           install -Dm 755 x86-64bit/Pianoteq\ 9 $out/bin/pianoteq9
           install -Dm 755 x86-64bit/Pianoteq\ 9.lv2/Pianoteq_9.so \
                           $out/lib/lv2/Pianoteq\ 9.lv2/Pianoteq_9.so
+          install -Dm 755 x86-64bit/Pianoteq\ 9.vst3/Contents/x86_64-linux/Pianoteq\ 9.so \
+                          $out/lib/vst3/Pianoteq\ 9.vst3/Contents/x86_64-linux/Pianoteq\ 9.so
           patchelf --set-interpreter "$(< $NIX_CC/nix-support/dynamic-linker)" \
                    --set-rpath $libPath "$out/bin/pianoteq9"
+          patchelf --set-rpath $libPath "$out/lib/vst3/Pianoteq 9.vst3/Contents/x86_64-linux/Pianoteq 9.so"
+
           cd x86-64bit/Pianoteq\ 9.lv2/
           for i in *.ttl; do
               install -D "$i" "$out/lib/lv2/Pianoteq 9.lv2/$i"
           done
+	  cd ../..
+
           runHook postInstall
         '';
 
