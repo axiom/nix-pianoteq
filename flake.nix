@@ -48,6 +48,7 @@
         libPath = lib.makeLibraryPath [
           alsa-lib
           freetype
+          fontconfig
           xorg.libX11
           xorg.libXext
           stdenv.cc.cc.lib
