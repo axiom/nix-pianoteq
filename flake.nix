@@ -1,104 +1,301 @@
-# Author: phga <phga@posteo.de>
 {
+  description = "Pianoteq - Physically modelled virtual instrument";
+
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
 
-  outputs = { self, nixpkgs }@inputs: {
+  outputs = { self, nixpkgs }:
+    let
+      systems = [ "x86_64-linux" ];
+      forAllSystems = nixpkgs.lib.genAttrs systems;
 
-    packages.x86_64-linux.default =
-
-      with import nixpkgs { system = "x86_64-linux"; };
-      stdenv.mkDerivation rec {
-        pname = "pianoteq";
-        version = "9.1.1";
-        in_file = "pianoteq_setup_v911.tar.xz";
-
-        icon = fetchurl {
-          name = "pianoteq_icon_128";
-          url = "https://www.pianoteq.com/images/logo/pianoteq_icon_128.png";
-          sha256 = "sha256-lO5kz2aIpJ108L9w2BHnRmq6wQP+6rF0lqifgor8xtM=";
+      # Version configuration with all necessary metadata
+      versions = {
+        pianoteq7 = {
+          version = "7.5.4";
+          file = "pianoteq_linux_v754.7z";
+          hash = "sha256-0000000000000000000000000000000000000000000000000000000000000"; # TODO: Fill when available
+          compression = "7z";
+          majorVersion = "7";
+          hasVst3 = false;
+          hasLv2 = true;
         };
-
-        # IMPORTANT: Use the following command to retrive the correct hash.
-        # Otherwise the file is not found in the nix store (Add it first ofc)
-        # nix hash to-sri --type sha256 `sha256sum ./pianoteq_linux_v???.7z | awk '{print $1}'`
-
-        src = requireFile {
-          name = "${in_file}";
-          message = "Download the file from: https://www.modartt.com/download?file=${in_file} and add it to the nix store manually: nix store add-file ./${in_file}";
-          sha256 = "sha256-Fu+bt3nxOYmSqzobENbrtYiUlRDO9dZ9y7Iqw+jQvPQ=";
+        pianoteq8 = {
+          version = "8.4.1";
+          file = "pianoteq_linux_v841.7z";
+          hash = "sha256-PPRSZ0qnDfWyTaQGuB0osWvIPHYMPaSB159FDrXaY0E=";
+          compression = "7z";
+          majorVersion = "8";
+          hasVst3 = false;
+          hasLv2 = true;
         };
-
-        # Alternative: Downloaded manually and place in this directory
-        # src = ./pianoteq_linux_v754.7z;
-
-        desktopItems = [
-          (makeDesktopItem {
-            name = "pianoteq9";
-            desktopName = "Pianoteq 9";
-            exec = "pianoteq9";
-            icon = "pianoteq_icon_128";
-          })
-        ];
-
-        nativeBuildInputs = [
-          xz
-          copyDesktopItems
-        ];
-
-        libPath = lib.makeLibraryPath [
-          alsa-lib
-          freetype
-          fontconfig
-          xorg.libX11
-          xorg.libXext
-          stdenv.cc.cc.lib
-          libjack2
-          lv2
-          libGL
-        ];
-
-        unpackCmd = "tar xf ${src}";
-
-        # `runHook postInstall` is mandatory otherwise postInstall won't run
-        installPhase = ''
-          install -d "$out/lib/vst3/Pianoteq 9.vst3/Contents/Resources/Snapshots"
-          cd x86-64bit/Pianoteq\ 9.vst3/Contents/
-	  cp -R --no-preserve=ownership "." "$out/lib/vst3/Pianoteq 9.vst3/Contents/"
-	  cd ../../..
-
-          install -Dm 755 x86-64bit/Pianoteq\ 9 $out/bin/pianoteq9
-          install -Dm 755 x86-64bit/Pianoteq\ 9.lv2/Pianoteq_9.so \
-                          $out/lib/lv2/Pianoteq\ 9.lv2/Pianoteq_9.so
-          install -Dm 755 x86-64bit/Pianoteq\ 9.vst3/Contents/x86_64-linux/Pianoteq\ 9.so \
-                          $out/lib/vst3/Pianoteq\ 9.vst3/Contents/x86_64-linux/Pianoteq\ 9.so
-          patchelf --set-interpreter "$(< $NIX_CC/nix-support/dynamic-linker)" \
-                   --set-rpath $libPath "$out/bin/pianoteq9"
-          patchelf --set-rpath $libPath "$out/lib/vst3/Pianoteq 9.vst3/Contents/x86_64-linux/Pianoteq 9.so"
-
-          cd x86-64bit/Pianoteq\ 9.lv2/
-          for i in *.ttl; do
-              install -D "$i" "$out/lib/lv2/Pianoteq 9.lv2/$i"
-          done
-	  cd ../..
-
-          runHook postInstall
-        '';
-
-        # This also works instead of the following
-        # makeWrapper $out/bin/pianoteq7 $out/bin/pianoteq7_wrapped --prefix LD_LIBRARY_PATH : "$libPath"
-        fixupPhase = '':'';
-
-        # Runs copyDesktopItems hook.
-        # Alternatively call copyDesktopItems manually in installPhase/fixupPhase
-        postInstall = ''
-          install -Dm 444 ${icon} $out/share/icons/hicolor/128x128/apps/pianoteq_icon_128.png
-        '';
-
-        meta = {
-          homepage = "https://www.modartt.com/";
-          description = "Pianoteq is a virtual instrument which in contrast to other virtual instruments is physically modelled and thus can simulate the playability and complex behaviour of real acoustic instruments. Because there are no samples, the file size is just a tiny fraction of that required by other virtual instruments.";
-          platforms = lib.platforms.linux;
+        pianoteq9 = {
+          version = "9.1.1";
+          file = "pianoteq_setup_v911.tar.xz";
+          hash = "sha256-Fu+bt3nxOYmSqzobENbrtYiUlRDO9dZ9y7Iqw+jQvPQ=";
+          compression = "tar.xz";
+          majorVersion = "9";
+          hasVst3 = true;
+          hasLv2 = true;
         };
       };
-  };
+
+      # Helper function to create Pianoteq packages with configurable features
+      mkPianoteqPackage = { system, versionKey, enableStandalone ? true, enableVst3 ? true, enableLv2 ? false }:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          lib = pkgs.lib;
+          versionConfig = versions.${versionKey};
+
+          # Validate that requested components are available in this version
+          validateComponents = lib.throwIf
+            (enableVst3 && !versionConfig.hasVst3)
+            "Pianoteq ${versionConfig.majorVersion} does not support VST3 plugin"
+            (lib.throwIf
+              (enableLv2 && !versionConfig.hasLv2)
+              "Pianoteq ${versionConfig.majorVersion} does not support LV2 plugin"
+              true);
+        in
+        pkgs.stdenv.mkDerivation rec {
+          pname = "pianoteq${versionConfig.majorVersion}";
+          inherit (versionConfig) version;
+
+          # Use appropriate file name based on compression
+          srcFile = versionConfig.file;
+
+          icon = pkgs.fetchurl {
+            name = "pianoteq_icon_128";
+            url = "https://www.pianoteq.com/images/logo/pianoteq_icon_128.png";
+            sha256 = "sha256-lO5kz2aIpJ108L9w2BHnRmq6wQP+6rF0lqifgor8xtM=";
+          };
+
+          src = pkgs.requireFile {
+            name = srcFile;
+            message = ''
+              ┌─────────────────────────────────────────────────────────────────┐
+              │  PIANOTEQ ${versionConfig.majorVersion} DOWNLOAD REQUIRED         │
+              └─────────────────────────────────────────────────────────────────┘
+            
+              1️⃣  Download: ${srcFile}
+                 From: https://www.modartt.com/download?file=${srcFile}
+               
+              2️⃣  Generate hash:
+                   nix hash file --sri ./${srcFile}
+                 
+              3️⃣  Update hash in flake.nix:
+                   Find the ${versionKey} entry and replace the hash
+                 
+              4️⃣  Add to nix store:
+                   nix store add-file ./${srcFile}
+            '';
+            inherit (versionConfig) hash;
+          };
+
+          # Common library dependencies for autoPatchelfHook
+          buildInputs = with pkgs; [
+            alsa-lib
+            freetype
+            fontconfig
+            xorg.libX11
+            xorg.libXext
+            stdenv.cc.cc.lib
+            libjack2
+            lv2
+            libGL
+          ];
+
+          # Libraries loaded at runtime via dlopen()
+          runtimeDependencies = with pkgs; [
+            libGL
+          ];
+
+          # Compression-specific native build inputs
+          nativeBuildInputs = with pkgs; [ autoPatchelfHook copyDesktopItems ] ++
+            (if versionConfig.compression == "7z" then [ p7zip ]
+            else if versionConfig.compression == "tar.xz" then [ xz ]
+            else throw "Unsupported compression: ${versionConfig.compression}");
+
+          # Compression-specific unpack command
+          unpackCmd =
+            if versionConfig.compression == "7z"
+            then "7z x ${src}"
+            else "tar xf ${src}";
+
+          # Create desktop items only for standalone builds (adopted from official package)
+          desktopItems = lib.optionals enableStandalone [
+            (pkgs.makeDesktopItem {
+              name = "pianoteq${versionConfig.majorVersion}";
+              desktopName = "Pianoteq ${versionConfig.majorVersion}";
+              exec = "pianoteq${versionConfig.majorVersion}";
+              icon = "pianoteq_icon_128";
+              comment = "Software synthesizer that features real-time MIDI-control of digital physically modeled pianos and related instruments";
+              categories = [ "AudioVideo" "Audio" "Recorder" ];
+              startupNotify = false;
+              startupWMClass = "Pianoteq";
+            })
+          ];
+
+          # Main build phase
+          buildPhase = ''
+            runHook preBuild
+            # No build step for binary package
+            runHook postBuild
+          '';
+
+          # Installation phase with conditional component installation
+          installPhase = ''
+            runHook preInstall
+
+            ${lib.optionalString enableStandalone ''
+              echo "Installing standalone application..."
+              install -Dm 755 "x86-64bit/Pianoteq ${versionConfig.majorVersion}" "$out/bin/pianoteq${versionConfig.majorVersion}"
+            ''}
+
+            ${lib.optionalString (enableVst3 && versionConfig.hasVst3) ''
+              echo "Installing VST3 plugin..."
+              install -d "$out/lib/vst3/Pianoteq ${versionConfig.majorVersion}.vst3/Contents/x86_64-linux"
+              install -Dm 755 "x86-64bit/Pianoteq ${versionConfig.majorVersion}.vst3/Contents/x86_64-linux/Pianoteq ${versionConfig.majorVersion}.so" \
+                          "$out/lib/vst3/Pianoteq ${versionConfig.majorVersion}.vst3/Contents/x86_64-linux/Pianoteq ${versionConfig.majorVersion}.so"
+              
+
+            ''}
+
+            ${lib.optionalString (enableLv2 && versionConfig.hasLv2) ''
+              echo "Installing LV2 plugin..."
+              install -Dm 755 "x86-64bit/Pianoteq ${versionConfig.majorVersion}.lv2/Pianoteq_${versionConfig.majorVersion}.so" \
+                          "$out/lib/lv2/Pianoteq ${versionConfig.majorVersion}.lv2/Pianoteq_${versionConfig.majorVersion}.so"
+              cd "x86-64bit/Pianoteq ${versionConfig.majorVersion}.lv2/"
+              for i in *.ttl; do
+                install -D "$i" "$out/lib/lv2/Pianoteq ${versionConfig.majorVersion}.lv2/$i"
+              done
+              cd ../..
+            ''}
+
+            runHook postInstall
+          '';
+
+          # Post-install for desktop integration (standalone only)
+          postInstall = lib.optionalString enableStandalone ''
+            install -Dm 444 ${icon} $out/share/icons/hicolor/128x128/apps/pianoteq_icon_128.png
+          '';
+
+          meta = with lib; {
+            homepage = "https://www.modartt.com/";
+            description = "Pianoteq ${versionConfig.majorVersion} - Physically modelled virtual instrument";
+            longDescription = ''
+              Pianoteq is a virtual instrument which in contrast to other virtual instruments 
+              is physically modelled and thus can simulate the playability and complex behaviour 
+              of real acoustic instruments. Because there are no samples, the file size is just 
+              a tiny fraction of that required by other virtual instruments.
+            '';
+            license = licenses.unfree;
+            platforms = [ "x86_64-linux" ];
+            maintainers = [ "phga <phga@posteo.de>" ];
+            sourceProvenance = with sourceTypes; [ binaryNativeCode ];
+          };
+        };
+
+    in
+    {
+      packages = forAllSystems (system: {
+        # Pianoteq 9 variants
+        pianoteq9 = mkPianoteqPackage {
+          inherit system;
+          versionKey = "pianoteq9";
+          enableStandalone = true;
+          enableVst3 = true;
+          enableLv2 = true;
+        };
+
+        pianoteq9-standalone = mkPianoteqPackage {
+          inherit system;
+          versionKey = "pianoteq9";
+          enableStandalone = true;
+          enableVst3 = false;
+          enableLv2 = false;
+        };
+
+        pianoteq9-vst3 = mkPianoteqPackage {
+          inherit system;
+          versionKey = "pianoteq9";
+          enableStandalone = false;
+          enableVst3 = true;
+          enableLv2 = false;
+        };
+
+        pianoteq9-lv2 = mkPianoteqPackage {
+          inherit system;
+          versionKey = "pianoteq9";
+          enableStandalone = false;
+          enableVst3 = false;
+          enableLv2 = true;
+        };
+
+        # Pianoteq 8 variants (no VST3 support)
+        pianoteq8 = mkPianoteqPackage {
+          inherit system;
+          versionKey = "pianoteq8";
+          enableStandalone = true;
+          enableVst3 = false; # Pianoteq 8 doesn't have VST3
+          enableLv2 = true;
+        };
+
+        pianoteq8-standalone = mkPianoteqPackage {
+          inherit system;
+          versionKey = "pianoteq8";
+          enableStandalone = true;
+          enableVst3 = false;
+          enableLv2 = false;
+        };
+
+        pianoteq8-lv2 = mkPianoteqPackage {
+          inherit system;
+          versionKey = "pianoteq8";
+          enableStandalone = false;
+          enableVst3 = false;
+          enableLv2 = true;
+        };
+
+        # Pianoteq 7 variants (no VST3 support)
+        pianoteq7 = mkPianoteqPackage {
+          inherit system;
+          versionKey = "pianoteq7";
+          enableStandalone = true;
+          enableVst3 = false; # Pianoteq 7 doesn't have VST3
+          enableLv2 = true;
+        };
+
+        pianoteq7-standalone = mkPianoteqPackage {
+          inherit system;
+          versionKey = "pianoteq7";
+          enableStandalone = true;
+          enableVst3 = false;
+          enableLv2 = false;
+        };
+
+        pianoteq7-lv2 = mkPianoteqPackage {
+          inherit system;
+          versionKey = "pianoteq7";
+          enableStandalone = false;
+          enableVst3 = false;
+          enableLv2 = true;
+        };
+
+        # Default package (latest version - full)
+        default = self.packages.${system}.pianoteq9;
+      });
+
+      # Development shell for easier maintenance
+      devShells = forAllSystems (system: {
+        default = nixpkgs.legacyPackages.${system}.mkShell {
+          buildInputs = with nixpkgs.legacyPackages.${system}; [
+            nixpkgs-fmt
+          ];
+        };
+      });
+
+      # Formatter for nix files
+      formatter = forAllSystems (system:
+        nixpkgs.legacyPackages.${system}.nixpkgs-fmt
+      );
+    };
 }
