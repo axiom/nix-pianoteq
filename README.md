@@ -5,11 +5,13 @@ A Nix flake that installs Pianoteq 7, 8, and 9 on NixOS. The license key and bin
 ## Quick Start
 
 ### Install Full Version (recommended)
+
 ```bash
 nix profile install .#pianoteq9  # Latest version with all formats
 ```
 
 ### Install Specific Format Only
+
 ```bash
 # VST3 plugin only (for DAW usage)
 nix profile install .#pianoteq9-vst3
@@ -34,7 +36,7 @@ nix profile install .#pianoteq9-lv2
 
 ## Installation Steps
 
-### 1. Download Pianoteq
+### Download Pianoteq
 
 Download the appropriate file from https://www.modartt.com/:
 
@@ -42,13 +44,13 @@ Download the appropriate file from https://www.modartt.com/:
 - **Pianoteq 8**: `pianoteq_linux_v841.7z`  
 - **Pianoteq 7**: `pianoteq_linux_v754.7z`
 
-### 2. Add to Nix Store
+### Add to Nix Store
 
 ```bash
 nix store add-file ./downloaded-file.tar.xz
 ```
 
-### 3. Install Package
+### Install Package
 
 ```bash
 # Install directly
@@ -65,52 +67,12 @@ environment.systemPackages = [
 ];
 ```
 
-**Note**: Hash generation is only needed when updating to a new version. For existing versions, the hash is already provided in the flake.
-
-### Option B: Manual Download (Traditional)
-
-For all users or when auto-download fails:
-
-```bash
-# Download from https://www.modartt.com/
-# - Pianoteq 9: pianoteq_setup_v911.tar.xz
-# - Pianoteq 8: pianoteq_linux_v841.7z  
-# - Pianoteq 7: pianoteq_linux_v754.7z
-
-# Add to nix store
-nix store add-file ./downloaded-file.tar.xz
-```
-
-**Note**: Hash generation is only needed when updating to a new version or adding a new version to the flake. For existing versions, the hash is already provided in the flake.
-
-### 3. Add to Nix Store
-
-```bash
-nix store add-file ./downloaded-file.tar.xz
-```
-
-### 4. Install Package
-
-```bash
-# Add to your flake inputs
-inputs = {
-  pianoteq.url = "github:yourusername/nix-pianoteq";
-};
-
-# Install in configuration.nix or home-manager
-environment.systemPackages = [
-  inputs.pianoteq.packages.x86_64-linux.default
-];
-
-# Or install directly with nix profile
-nix profile install .#pianoteq9
-```
-
 ## Adding New Versions
 
 To add a new Pianoteq version:
 
-### 1. Download and Add to Store
+### Download and Add to Store
+
 ```bash
 # Download new version
 wget https://www.modartt.com/download?file=pianoteq_linux_vXYZ.7z
@@ -119,7 +81,7 @@ wget https://www.modartt.com/download?file=pianoteq_linux_vXYZ.7z
 nix store add-file ./pianoteq_linux_vXYZ.7z
 ```
 
-### 2. Generate Hash (only for new versions)
+### Generate Hash (only for new versions)
 
 When adding a new version to the flake, generate the hash:
 
@@ -127,7 +89,7 @@ When adding a new version to the flake, generate the hash:
 nix hash file --sri ./pianoteq_linux_vXYZ.7z
 ```
 
-### 3. Update Version Configuration
+### Update Version Configuration
 
 Add to the `versions` section in `flake.nix`:
 
@@ -138,7 +100,6 @@ pianoteqX = {
   hash = "sha256-GENERATED_HASH_HERE"; 
   compression = "7z"; # or "tar.xz"
   majorVersion = "X";
-  hasStandalone = true;  # Set based on actual contents
   hasVst3 = true/false;   # Set based on actual contents  
   hasLv2 = true/false;     # Set based on actual contents
 };
@@ -146,7 +107,7 @@ pianoteqX = {
 
 ## Version Support
 
-**VST3 support was introduced in Pianoteq 9** - earlier versions (7 and 8) only support standalone and LV2 formats.
+Seems like linux **VST3 support was introduced in Pianoteq 9** - earlier versions (7 and 8) only support standalone and LV2 formats.
 
 ## Troubleshooting
 
@@ -173,7 +134,7 @@ nix store add-file ./pianoteq_setup_v911.tar.xz
 
 ### Hash Mismatch
 
-If you get a hash mismatch error, regenerate the hash:
+If you get a hash mismatch error, but want to use the downloaded file anyway, regenerate the hash:
 
 ```bash
 nix hash file --sri ./your-downloaded-file
@@ -188,7 +149,7 @@ Then update the hash in the `versions` section of `flake.nix`.
 For easier maintenance and formatting:
 
 ```bash
-nix develop --impure
+nix develop
 ```
 
 ### Code Formatting
@@ -196,13 +157,5 @@ nix develop --impure
 Format Nix files with the built-in formatter:
 
 ```bash
-nix fmt . --impure
+nix fmt .
 ```
-
-### Available Commands
-
-The flake includes a development shell with `nixpkgs-fmt` for code formatting and a formatter for automated formatting.
-
-## License
-
-This Nix flake is licensed under the same terms as Pianoteq itself. Please refer to the Modartt website for licensing information: https://www.modartt.com/
