@@ -44,12 +44,7 @@
         let
           pkgs = import nixpkgs {
             inherit system;
-            config.allowUnfreePredicate = pkg:
-              builtins.elem (pkg.pname or (builtins.parseDrvName pkg.name).name) [
-                "pianoteq7"
-                "pianoteq8"
-                "pianoteq9"
-              ];
+	    config.allowUnfree = true;
           };
           lib = pkgs.lib;
           versionConfig = versions.${versionKey};
