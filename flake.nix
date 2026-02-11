@@ -13,25 +13,25 @@
         pianoteq7 = {
           version = "7.5.4";
           file = "pianoteq_linux_v754.7z";
-          hash = "sha256-0000000000000000000000000000000000000000000000000000000000000"; # TODO: Fill when available
+          hash = "sha256-TA9CiuT21fQedlMUGz7bNNxYun5ArmRjvIxjOGqXDCs=";
           compression = "7z";
           majorVersion = "7";
           hasVst3 = false;
           hasLv2 = true;
         };
         pianoteq8 = {
-          version = "8.4.1";
+          version = "8.4.3";
           file = "pianoteq_linux_v841.7z";
-          hash = "sha256-PPRSZ0qnDfWyTaQGuB0osWvIPHYMPaSB159FDrXaY0E=";
+          hash = "sha256-72eV+d3jwRZJSs6I4e055ZrR/dvnhwAaM63eZEQAtOg=";
           compression = "7z";
           majorVersion = "8";
           hasVst3 = false;
           hasLv2 = true;
         };
         pianoteq9 = {
-          version = "9.1.1";
+          version = "9.1.2";
           file = "pianoteq_setup_v911.tar.xz";
-          hash = "sha256-Fu+bt3nxOYmSqzobENbrtYiUlRDO9dZ9y7Iqw+jQvPQ=";
+          hash = "sha256-Jvm/AhBwgj5INW8U48rJjgDB7j/Z1VnYKczvtrpl/AY=";
           compression = "tar.xz";
           majorVersion = "9";
           hasVst3 = true;
