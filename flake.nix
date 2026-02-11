@@ -9,28 +9,30 @@
       forAllSystems = nixpkgs.lib.genAttrs systems;
 
       # Version configuration with all necessary metadata
+      # versionCompact strips dots from version (e.g. "9.1.2" -> "912")
+      mkVersion = version: builtins.replaceStrings [ "." ] [ "" ] version;
       versions = {
-        pianoteq7 = {
+        pianoteq7 = rec {
           version = "7.5.4";
-          file = "pianoteq_linux_v754.7z";
+          file = "pianoteq_linux_v${mkVersion version}.7z";
           hash = "sha256-TA9CiuT21fQedlMUGz7bNNxYun5ArmRjvIxjOGqXDCs=";
           compression = "7z";
           majorVersion = "7";
           hasVst3 = false;
           hasLv2 = true;
         };
-        pianoteq8 = {
+        pianoteq8 = rec {
           version = "8.4.3";
-          file = "pianoteq_linux_v841.7z";
+          file = "pianoteq_linux_v${mkVersion version}.7z";
           hash = "sha256-72eV+d3jwRZJSs6I4e055ZrR/dvnhwAaM63eZEQAtOg=";
           compression = "7z";
           majorVersion = "8";
           hasVst3 = false;
           hasLv2 = true;
         };
-        pianoteq9 = {
+        pianoteq9 = rec {
           version = "9.1.2";
-          file = "pianoteq_setup_v911.tar.xz";
+          file = "pianoteq_setup_v${mkVersion version}.tar.xz";
           hash = "sha256-Jvm/AhBwgj5INW8U48rJjgDB7j/Z1VnYKczvtrpl/AY=";
           compression = "tar.xz";
           majorVersion = "9";
