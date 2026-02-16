@@ -31,8 +31,12 @@ nix profile install .#pianoteq9-lv2
 | `pianoteq9-standalone` | Standalone only |
 | `pianoteq9-vst3` | VST3 plugin only |
 | `pianoteq9-lv2` | LV2 plugin only |
-| `pianoteq8*` | Standalone + LV2 (VST3 was introduced in v9) |
-| `pianoteq7*` | Standalone + LV2 (VST3 was introduced in v9) |
+| `pianoteq8` | Full version (Standalone + LV2) |
+| `pianoteq8-standalone` | Standalone only |
+| `pianoteq8-lv2` | LV2 plugin only |
+| `pianoteq7` | Full version (Standalone + LV2) |
+| `pianoteq7-standalone` | Standalone only |
+| `pianoteq7-lv2` | LV2 plugin only |
 
 ## Installation Steps
 
@@ -40,8 +44,8 @@ nix profile install .#pianoteq9-lv2
 
 Download the appropriate file from https://www.modartt.com/:
 
-- **Pianoteq 9**: `pianoteq_setup_v911.tar.xz`
-- **Pianoteq 8**: `pianoteq_linux_v841.7z`  
+- **Pianoteq 9**: `pianoteq_setup_v912.tar.xz`
+- **Pianoteq 8**: `pianoteq_linux_v843.7z`  
 - **Pianoteq 7**: `pianoteq_linux_v754.7z`
 
 ### Add to Nix Store
@@ -107,7 +111,7 @@ pianoteqX = {
 
 ## Version Support
 
-Seems like linux **VST3 support was introduced in Pianoteq 9** - earlier versions (7 and 8) only support standalone and LV2 formats.
+Linux **VST3 support was introduced in Pianoteq 9**; earlier versions (7 and 8) only support standalone and LV2 formats.
 
 ## Troubleshooting
 
