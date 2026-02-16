@@ -63,9 +63,9 @@
           srcFile = versionConfig.file;
 
           icon = pkgs.fetchurl {
-            name = "pianoteq_icon_128";
-            url = "https://www.pianoteq.com/images/logo/pianoteq_icon_128.png";
-            sha256 = "sha256-lO5kz2aIpJ108L9w2BHnRmq6wQP+6rF0lqifgor8xtM=";
+            name = "pianoteq_app_logo";
+            url = "https://www.modartt.com/images/logo/pianoteq_app_logo.png";
+            sha256 = "sha256-ASiFH6wA/fKf/FvckfJttREX9/3POiVi+PvaHOKBahs=";
           };
 
           src = pkgs.requireFile {
@@ -110,7 +110,7 @@
               name = "pianoteq${majorVersion}";
               desktopName = "Pianoteq ${majorVersion}";
               exec = "pianoteq${majorVersion}";
-              icon = "pianoteq_icon_128";
+              icon = icon.name;
               comment = "Software synthesizer that features real-time MIDI-control of digital physically modeled pianos and related instruments";
               categories = [ "AudioVideo" "Audio" "Recorder" ];
               startupNotify = false;
@@ -159,7 +159,7 @@
 
           # Post-install for desktop integration (standalone only)
           postInstall = lib.optionalString enableStandalone ''
-            install -Dm 444 ${icon} $out/share/icons/hicolor/128x128/apps/pianoteq_icon_128.png
+            install -Dm 444 ${icon} $out/share/icons/hicolor/128x128/apps/${icon.name}.png
           '';
 
           meta = with lib; {
