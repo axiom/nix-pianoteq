@@ -46,7 +46,7 @@
         let
           pkgs = import nixpkgs {
             inherit system;
-	    config.allowUnfree = true;
+            config.allowUnfree = true;
           };
           lib = pkgs.lib;
           versionConfig = versions.${versionKey};
@@ -75,23 +75,7 @@
 
           src = pkgs.requireFile {
             name = srcFile;
-            message = ''
-              ┌─────────────────────────────────────────────────────────────────┐
-              │  PIANOTEQ ${versionConfig.majorVersion} DOWNLOAD REQUIRED         │
-              └─────────────────────────────────────────────────────────────────┘
-            
-              1️⃣  Download: ${srcFile}
-                 From: https://www.modartt.com/download?file=${srcFile}
-               
-              2️⃣  Generate hash:
-                   nix hash file --sri ./${srcFile}
-                 
-              3️⃣  Update hash in flake.nix:
-                   Find the ${versionKey} entry and replace the hash
-                 
-              4️⃣  Add to nix store:
-                   nix store add-file ./${srcFile}
-            '';
+            url = "https://www.modartt.com/download?file=${srcFile}";
             inherit (versionConfig) hash;
           };
 
