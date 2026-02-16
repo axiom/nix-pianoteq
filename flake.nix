@@ -16,7 +16,6 @@
           version = "7.5.4";
           file = "pianoteq_linux_v${mkVersion version}.7z";
           hash = "sha256-TA9CiuT21fQedlMUGz7bNNxYun5ArmRjvIxjOGqXDCs=";
-          majorVersion = "7";
           hasVst3 = false;
           hasLv2 = true;
         };
@@ -24,7 +23,6 @@
           version = "8.4.3";
           file = "pianoteq_linux_v${mkVersion version}.7z";
           hash = "sha256-72eV+d3jwRZJSs6I4e055ZrR/dvnhwAaM63eZEQAtOg=";
-          majorVersion = "8";
           hasVst3 = false;
           hasLv2 = true;
         };
@@ -32,7 +30,6 @@
           version = "9.1.2";
           file = "pianoteq_setup_v${mkVersion version}.tar.xz";
           hash = "sha256-Jvm/AhBwgj5INW8U48rJjgDB7j/Z1VnYKczvtrpl/AY=";
-          majorVersion = "9";
           hasVst3 = true;
           hasLv2 = true;
         };
@@ -47,18 +44,19 @@
           };
           lib = pkgs.lib;
           versionConfig = versions.${versionKey};
+          majorVersion = builtins.head (builtins.split "\\." versionConfig.version);
 
           # Validate that requested components are available in this version
           validateComponents = lib.throwIf
             (enableVst3 && !versionConfig.hasVst3)
-            "Pianoteq ${versionConfig.majorVersion} does not support VST3 plugin"
+            "Pianoteq ${majorVersion} does not support VST3 plugin"
             (lib.throwIf
               (enableLv2 && !versionConfig.hasLv2)
-              "Pianoteq ${versionConfig.majorVersion} does not support LV2 plugin"
+              "Pianoteq ${majorVersion} does not support LV2 plugin"
               true);
         in
         pkgs.stdenv.mkDerivation rec {
-          pname = "pianoteq${versionConfig.majorVersion}";
+          pname = "pianoteq${majorVersion}";
           inherit (versionConfig) version;
 
           # Use appropriate file name based on compression
@@ -109,9 +107,9 @@
           # Create desktop items only for standalone builds (adopted from official package)
           desktopItems = lib.optionals enableStandalone [
             (pkgs.makeDesktopItem {
-              name = "pianoteq${versionConfig.majorVersion}";
-              desktopName = "Pianoteq ${versionConfig.majorVersion}";
-              exec = "pianoteq${versionConfig.majorVersion}";
+              name = "pianoteq${majorVersion}";
+              desktopName = "Pianoteq ${majorVersion}";
+              exec = "pianoteq${majorVersion}";
               icon = "pianoteq_icon_128";
               comment = "Software synthesizer that features real-time MIDI-control of digital physically modeled pianos and related instruments";
               categories = [ "AudioVideo" "Audio" "Recorder" ];
@@ -133,25 +131,25 @@
 
             ${lib.optionalString enableStandalone ''
               echo "Installing standalone application..."
-              install -Dm 755 "x86-64bit/Pianoteq ${versionConfig.majorVersion}" "$out/bin/pianoteq${versionConfig.majorVersion}"
+              install -Dm 755 "x86-64bit/Pianoteq ${majorVersion}" "$out/bin/pianoteq${majorVersion}"
             ''}
 
             ${lib.optionalString (enableVst3 && versionConfig.hasVst3) ''
               echo "Installing VST3 plugin..."
-              install -d "$out/lib/vst3/Pianoteq ${versionConfig.majorVersion}.vst3/Contents/x86_64-linux"
-              install -Dm 755 "x86-64bit/Pianoteq ${versionConfig.majorVersion}.vst3/Contents/x86_64-linux/Pianoteq ${versionConfig.majorVersion}.so" \
-                          "$out/lib/vst3/Pianoteq ${versionConfig.majorVersion}.vst3/Contents/x86_64-linux/Pianoteq ${versionConfig.majorVersion}.so"
+              install -d "$out/lib/vst3/Pianoteq ${majorVersion}.vst3/Contents/x86_64-linux"
+              install -Dm 755 "x86-64bit/Pianoteq ${majorVersion}.vst3/Contents/x86_64-linux/Pianoteq ${majorVersion}.so" \
+                          "$out/lib/vst3/Pianoteq ${majorVersion}.vst3/Contents/x86_64-linux/Pianoteq ${majorVersion}.so"
               
 
             ''}
 
             ${lib.optionalString (enableLv2 && versionConfig.hasLv2) ''
               echo "Installing LV2 plugin..."
-              install -Dm 755 "x86-64bit/Pianoteq ${versionConfig.majorVersion}.lv2/Pianoteq_${versionConfig.majorVersion}.so" \
-                          "$out/lib/lv2/Pianoteq ${versionConfig.majorVersion}.lv2/Pianoteq_${versionConfig.majorVersion}.so"
-              cd "x86-64bit/Pianoteq ${versionConfig.majorVersion}.lv2/"
+              install -Dm 755 "x86-64bit/Pianoteq ${majorVersion}.lv2/Pianoteq_${majorVersion}.so" \
+                          "$out/lib/lv2/Pianoteq ${majorVersion}.lv2/Pianoteq_${majorVersion}.so"
+              cd "x86-64bit/Pianoteq ${majorVersion}.lv2/"
               for i in *.ttl; do
-                install -D "$i" "$out/lib/lv2/Pianoteq ${versionConfig.majorVersion}.lv2/$i"
+                install -D "$i" "$out/lib/lv2/Pianoteq ${majorVersion}.lv2/$i"
               done
               cd ../..
             ''}
@@ -166,7 +164,7 @@
 
           meta = with lib; {
             homepage = "https://www.modartt.com/";
-            description = "Pianoteq ${versionConfig.majorVersion} - Physically modelled virtual instrument";
+            description = "Pianoteq ${majorVersion} - Physically modelled virtual instrument";
             longDescription = ''
               Pianoteq is a virtual instrument which in contrast to other virtual instruments 
               is physically modelled and thus can simulate the playability and complex behaviour 
