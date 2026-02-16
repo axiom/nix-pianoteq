@@ -16,7 +16,6 @@
           version = "7.5.4";
           file = "pianoteq_linux_v${mkVersion version}.7z";
           hash = "sha256-TA9CiuT21fQedlMUGz7bNNxYun5ArmRjvIxjOGqXDCs=";
-          compression = "7z";
           majorVersion = "7";
           hasVst3 = false;
           hasLv2 = true;
@@ -25,7 +24,6 @@
           version = "8.4.3";
           file = "pianoteq_linux_v${mkVersion version}.7z";
           hash = "sha256-72eV+d3jwRZJSs6I4e055ZrR/dvnhwAaM63eZEQAtOg=";
-          compression = "7z";
           majorVersion = "8";
           hasVst3 = false;
           hasLv2 = true;
@@ -34,7 +32,6 @@
           version = "9.1.2";
           file = "pianoteq_setup_v${mkVersion version}.tar.xz";
           hash = "sha256-Jvm/AhBwgj5INW8U48rJjgDB7j/Z1VnYKczvtrpl/AY=";
-          compression = "tar.xz";
           majorVersion = "9";
           hasVst3 = true;
           hasLv2 = true;
@@ -97,17 +94,17 @@
             libGL
           ];
 
+          compression =
+            if lib.hasSuffix ".7z" srcFile then "7z"
+            else if lib.hasSuffix ".tar.xz" srcFile then "tar.xz"
+            else lib.throwIf true "Unsupported source archive: ${srcFile}" null;
+
           # Compression-specific native build inputs
           nativeBuildInputs = with pkgs; [ autoPatchelfHook copyDesktopItems ] ++
-            (if versionConfig.compression == "7z" then [ p7zip ]
-            else if versionConfig.compression == "tar.xz" then [ xz ]
-            else throw "Unsupported compression: ${versionConfig.compression}");
+            (if compression == "7z" then [ p7zip ] else [ xz ]);
 
           # Compression-specific unpack command
-          unpackCmd =
-            if versionConfig.compression == "7z"
-            then "7z x ${src}"
-            else "tar xf ${src}";
+          unpackCmd = if compression == "7z" then "7z x ${src}" else "tar xf ${src}";
 
           # Create desktop items only for standalone builds (adopted from official package)
           desktopItems = lib.optionals enableStandalone [
