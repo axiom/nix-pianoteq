@@ -3,7 +3,8 @@
 
   inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
 
-  outputs = { self, nixpkgs }:
+  outputs =
+    { self, nixpkgs }:
     let
       systems = [ "x86_64-linux" ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
@@ -23,14 +24,21 @@
           hash = "sha256-72eV+d3jwRZJSs6I4e055ZrR/dvnhwAaM63eZEQAtOg=";
         };
         pianoteq9 = rec {
-          version = "9.1.2";
+          version = "9.2.1";
           file = "pianoteq_setup_v${mkVersion version}.tar.xz";
-          hash = "sha256-Jvm/AhBwgj5INW8U48rJjgDB7j/Z1VnYKczvtrpl/AY=";
+          hash = "sha256-iIKYmXy7d5mGkONUqR91Qjo7IIGJE9eBN4pCr0+D7no=";
         };
       };
 
       # Helper function to create Pianoteq packages with configurable features
-      mkPianoteqPackage = { system, versionKey, enableStandalone ? true, enableVst3 ? true, enableLv2 ? false }:
+      mkPianoteqPackage =
+        { system
+        , versionKey
+        , enableStandalone ? true
+        , enableVst3 ? true
+        , enableLv2 ? false
+        ,
+        }:
         let
           pkgs = import nixpkgs {
             inherit system;
@@ -43,8 +51,9 @@
           # Validate that requested components are available in this version
           hasVst3 = majorVersion == "9";
           validateComponents = lib.throwIf
-            (enableVst3 && !hasVst3)
-            "Pianoteq ${majorVersion} does not support VST3 plugin"
+            (
+              enableVst3 && !hasVst3
+            ) "Pianoteq ${majorVersion} does not support VST3 plugin"
             true;
 
         in
@@ -86,13 +95,21 @@
           ];
 
           compression =
-            if lib.hasSuffix ".7z" srcFile then "7z"
-            else if lib.hasSuffix ".tar.xz" srcFile then "tar.xz"
-            else lib.throwIf true "Unsupported source archive: ${srcFile}" null;
+            if lib.hasSuffix ".7z" srcFile then
+              "7z"
+            else if lib.hasSuffix ".tar.xz" srcFile then
+              "tar.xz"
+            else
+              lib.throwIf true "Unsupported source archive: ${srcFile}" null;
 
           # Compression-specific native build inputs
-          nativeBuildInputs = with pkgs; [ autoPatchelfHook copyDesktopItems ] ++
-            (if compression == "7z" then [ p7zip ] else [ xz ]);
+          nativeBuildInputs =
+            with pkgs;
+            [
+              autoPatchelfHook
+              copyDesktopItems
+            ]
+            ++ (if compression == "7z" then [ p7zip ] else [ xz ]);
 
           # Compression-specific unpack command
           unpackCmd = if compression == "7z" then "7z x ${src}" else "tar xf ${src}";
@@ -105,7 +122,11 @@
               exec = "pianoteq${majorVersion}";
               icon = icon.name;
               comment = "Software synthesizer that features real-time MIDI-control of digital physically modeled pianos and related instruments";
-              categories = [ "AudioVideo" "Audio" "Recorder" ];
+              categories = [
+                "AudioVideo"
+                "Audio"
+                "Recorder"
+              ];
               startupNotify = false;
               startupWMClass = "Pianoteq";
             })
@@ -132,7 +153,7 @@
               install -d "$out/lib/vst3/Pianoteq ${majorVersion}.vst3/Contents/x86_64-linux"
               install -Dm 755 "x86-64bit/Pianoteq ${majorVersion}.vst3/Contents/x86_64-linux/Pianoteq ${majorVersion}.so" \
                           "$out/lib/vst3/Pianoteq ${majorVersion}.vst3/Contents/x86_64-linux/Pianoteq ${majorVersion}.so"
-              
+
 
             ''}
 
@@ -271,8 +292,6 @@
       });
 
       # Formatter for nix files
-      formatter = forAllSystems (system:
-        nixpkgs.legacyPackages.${system}.nixpkgs-fmt
-      );
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixpkgs-fmt);
     };
 }
