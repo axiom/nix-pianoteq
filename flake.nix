@@ -24,9 +24,9 @@
           hash = "sha256-72eV+d3jwRZJSs6I4e055ZrR/dvnhwAaM63eZEQAtOg=";
         };
         pianoteq9 = rec {
-          version = "9.2.1";
+          version = "9.2.4";
           file = "pianoteq_setup_v${mkVersion version}.tar.xz";
-          hash = "sha256-iIKYmXy7d5mGkONUqR91Qjo7IIGJE9eBN4pCr0+D7no=";
+          hash = "sha256-k7FqA4RoGBUh2y/Ipqf7W6ORHk0a8pSAGJwjN2smlsg=";
         };
       };
 
