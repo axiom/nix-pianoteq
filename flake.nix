@@ -81,8 +81,8 @@
             alsa-lib
             freetype
             fontconfig
-            xorg.libX11
-            xorg.libXext
+            libx11
+            libxext
             stdenv.cc.cc.lib
             libjack2
             lv2
