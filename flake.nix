@@ -24,9 +24,9 @@
           hash = "sha256-72eV+d3jwRZJSs6I4e055ZrR/dvnhwAaM63eZEQAtOg=";
         };
         pianoteq9 = rec {
-          version = "9.2.5";
+          version = "9.3.0";
           file = "pianoteq_setup_v${mkVersion version}.tar.xz";
-          hash = "sha256-Dqacp6IC3MOlp9hHaIuxm/ZJfhVsBPT1efroKnPjZiM=";
+          hash = "sha256-rocFSDLzPjIDEULcIv14EooGm5uPH8kBWkN2Oz53qZs=";
         };
       };
 
@@ -55,7 +55,6 @@
               enableVst3 && !hasVst3
             ) "Pianoteq ${majorVersion} does not support VST3 plugin"
             true;
-
         in
         pkgs.stdenv.mkDerivation rec {
           pname = "pianoteq${majorVersion}";
@@ -87,6 +86,7 @@
             libjack2
             lv2
             libGL
+            (lib.getLib curl)
           ];
 
           # Libraries loaded at runtime via dlopen()
